@@ -1,3 +1,5 @@
+# Josh Bedwell © 2025
+
 import contextlib
 import tarfile
 import tempfile

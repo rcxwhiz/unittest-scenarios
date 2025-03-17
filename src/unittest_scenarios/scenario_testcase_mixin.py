@@ -1,3 +1,5 @@
+# Josh Bedwell © 2025
+
 import enum
 import os
 import shutil
