@@ -38,6 +38,12 @@ class FileCmpMixin:
                 os.path.join(expected_dir, item), os.path.join(actual_dir, item)
             )
 
+    def assertDirectoryContentsNotEqual(
+        self, expected_dir: str | PathLike[str], actual_dir: str | PathLike[str]
+    ) -> None:
+        with self.assertRaises(AssertionError, msg="Directory contents equal."):
+            self.assertDirectoryContentsEqual(expected_dir, actual_dir)
+
     def assertArchiveContentsEqual(
         self, expected_arc: str | PathLike[str], actual_arc: str | PathLike[str]
     ) -> None:
@@ -46,6 +52,12 @@ class FileCmpMixin:
             temp_archive_extract(actual_arc) as actual_extracted,
         ):
             self.assertDirectoryContentsEqual(expected_extracted, actual_extracted)
+
+    def assertArchiveContentsNotEqual(
+        self, expected_arc: str | PathLike[str], actual_arc: str | PathLike[str]
+    ) -> None:
+        with self.assertRaises(AssertionError, msg="Archive contents equal."):
+            self.assertArchiveContentsEqual(expected_arc, actual_arc)
 
     def assertTextFilesEqual(
         self, expected_file: str | PathLike[str], actual_file: str | PathLike[str]
@@ -71,6 +83,12 @@ class FileCmpMixin:
                     f"{actual_file} does not match {expected_file} on line {i + 1}",
                 )
 
+    def assertTextFilesNotEqual(
+        self, expected_file: str | PathLike[str], actual_file: str | PathLike[str]
+    ) -> None:
+        with self.assertRaises(AssertionError, msg="Text files equal."):
+            self.assertTextFilesEqual(expected_file, actual_file)
+
     def assertFileHashesEqual(
         self,
         expected_file: str | PathLike[str],
@@ -86,6 +104,15 @@ class FileCmpMixin:
             actual_hash,
             f"Hash of {actual_file} does not match {expected_file}",
         )
+
+    def assertFileHashesNotEqual(
+        self,
+        expected_file: str | PathLike[str],
+        actual_file: str | PathLike[str],
+        hash_func: Callable[[bytes], Any] = lambda x: hashlib.sha256(x).hexdigest(),
+    ) -> None:
+        with self.assertRaises(AssertionError, msg="File hashes equal."):
+            self.assertFileHashesEqual(expected_file, actual_file, hash_func=hash_func)
 
     def assertPathContentsEqual(
         self, expected_path: str | PathLike[str], actual_path: str | PathLike[str]
@@ -106,6 +133,12 @@ class FileCmpMixin:
 
         else:
             self.assertFileHashesEqual(expected_path, actual_path)
+
+    def assertPathContentsNotEqual(
+        self, expected_path: str | PathLike[str], actual_path: str | PathLike[str]
+    ) -> None:
+        with self.assertRaises(AssertionError, msg="Path contents equal."):
+            self.assertPathContentsEqual(expected_path, actual_path)
 
     def _is_text_file(self, file: str | PathLike[str]) -> bool:
         try:
