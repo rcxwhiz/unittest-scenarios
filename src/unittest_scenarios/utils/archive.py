@@ -22,7 +22,15 @@ def temp_archive_extract(archive_path: str | PathLike[str]):
         if archive_path.suffix == ".zip":
             with zipfile.ZipFile(archive_path, "r") as zip_ref:
                 zip_ref.extractall(temp_dir)
-        elif archive_path.suffix in (".tar", ".gz", ".tgz", ".bz2", "tbz2", ".xz", "txz"):
+        elif archive_path.suffix in (
+            ".tar",
+            ".gz",
+            ".tgz",
+            ".bz2",
+            "tbz2",
+            ".xz",
+            "txz",
+        ):
             with tarfile.open(archive_path, "r:*") as tar_ref:
                 tar_ref.extractall(temp_dir)
         else:

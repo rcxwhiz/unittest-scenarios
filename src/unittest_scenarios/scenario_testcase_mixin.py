@@ -3,8 +3,8 @@
 import enum
 import os
 import shutil
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from unittest_scenarios.file_cmp_mixin import FileCmpMixin
 from unittest_scenarios.isolated_working_dir_mixin import IsolatedWorkingDirMixin
@@ -48,15 +48,24 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
                 self._copy_initial_state(scenario_path)
                 self.run_scenario(scenario_name)
                 self._check_final_state(scenario_path)
+
         return test_func
 
     def _copy_initial_state(self, scenario_path: str) -> None:
         scenario_path = Path(scenario_path)
-        initial_states = [file for file in os.listdir(scenario_path) if Path(file).stem == "initial_state"]
+        initial_states = [
+            file
+            for file in os.listdir(scenario_path)
+            if Path(file).stem == "initial_state"
+        ]
         if len(initial_states) == 0:
-            raise FileNotFoundError(f"Could not find initial state in {scenario_path.name}")
+            raise FileNotFoundError(
+                f"Could not find initial state in {scenario_path.name}"
+            )
         if len(initial_states) > 1:
-            raise FileExistsError(f"Found multiple initial states in {scenario_path.name}")
+            raise FileExistsError(
+                f"Found multiple initial states in {scenario_path.name}"
+            )
 
         initial_state_path = initial_states[0]
         if is_archive(initial_state_path):
@@ -70,11 +79,19 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
             return
 
         scenario_path = Path(scenario_path)
-        final_states = [file for file in os.listdir(scenario_path) if Path(file).stem == "final_state"]
+        final_states = [
+            file
+            for file in os.listdir(scenario_path)
+            if Path(file).stem == "final_state"
+        ]
         if len(final_states) == 0:
-            raise FileNotFoundError(f"Could not find final state in {scenario_path.name}")
+            raise FileNotFoundError(
+                f"Could not find final state in {scenario_path.name}"
+            )
         if len(final_states) > 1:
-            raise FileExistsError(f"Found multiple final states in {scenario_path.name}")
+            raise FileExistsError(
+                f"Found multiple final states in {scenario_path.name}"
+            )
 
         def cmp(expected, actual):
             if self.check_strategy == ScenarioTestCaseMixin.OutputChecking.FILE_NAMES:

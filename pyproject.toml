@@ -1,13 +1,13 @@
 [project]
 name = "unittest-scenarios"
-version = "0.0.0"
+version = "0.0.1"
 description = "Add scenario based testing to unittest."
 authors = [
     { name = "Josh Bedwell", email = "rcxwhiz@gmail.com" }
 ]
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
 ]
 classifiers = [

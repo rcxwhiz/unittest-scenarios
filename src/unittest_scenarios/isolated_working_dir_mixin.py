@@ -4,8 +4,9 @@ import os
 import shutil
 import tempfile
 import unittest
-from typing import Any, Literal, Callable
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any, Literal
 
 
 class IsolatedWorkingDirMixin:
@@ -45,9 +46,13 @@ class IsolatedWorkingDirMixin:
                 # if external path is relative, join with original working directory
                 external_path = connection.external_path
                 if not os.path.isabs(external_path):
-                    external_path = os.path.join(self.original_working_dir, external_path)
+                    external_path = os.path.join(
+                        self.original_working_dir, external_path
+                    )
                 if not os.path.exists(external_path):
-                    raise FileNotFoundError(f"Could not connect {external_path} to test, does not exist")
+                    raise FileNotFoundError(
+                        f"Could not connect {external_path} to test, does not exist"
+                    )
                 # if internal path is none, use the basename of the external path
                 internal_path = connection.internal_path
                 if internal_path is None:
@@ -62,7 +67,9 @@ class IsolatedWorkingDirMixin:
                     else:
                         shutil.copy(external_path, internal_path)
                 else:
-                    raise TypeError(f"Unrecognized connection strategy: {connection.strategy}")
+                    raise TypeError(
+                        f"Unrecognized connection strategy: {connection.strategy}"
+                    )
 
     def _cleanup_temp_dir(self):
         try:
