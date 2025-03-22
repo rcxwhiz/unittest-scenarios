@@ -11,7 +11,16 @@ from pathlib import Path
 def is_archive(filename: str | PathLike[str]) -> bool:
     if not isinstance(filename, Path):
         filename = Path(filename)
-    return filename.suffix in (".tar", ".gz", ".tgz", ".bz2", ".tbz2", ".xz", ".txz")
+    return filename.suffix in (
+        ".zip",
+        ".tar",
+        ".gz",
+        ".tgz",
+        ".bz2",
+        ".tbz2",
+        ".xz",
+        ".txz",
+    )
 
 
 @contextlib.contextmanager
@@ -27,9 +36,9 @@ def temp_archive_extract(archive_path: str | PathLike[str]):
             ".gz",
             ".tgz",
             ".bz2",
-            "tbz2",
+            ".tbz2",
             ".xz",
-            "txz",
+            ".txz",
         ):
             with tarfile.open(archive_path, "r:*") as tar_ref:
                 tar_ref.extractall(temp_dir)

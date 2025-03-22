@@ -11,7 +11,7 @@ repos:
     hooks:
     -   id: flake8
         args: ['--extend-ignore=E203,E701', '--max-line-length=88']
-        files: ^(src/unittest_scenarios|tests)/
+        files: ^(src/unittest_scenarios)/
 
 -   repo: https://github.com/asottile/pyupgrade
     rev: v3.19.1
