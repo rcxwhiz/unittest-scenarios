@@ -53,6 +53,13 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 zip.write(file_path, arcname=filename)
                 os.remove(file_path)
 
+    def test_subclass_requirement(self):
+        class BadClass(FileCmpMixin):
+            pass
+
+        with self.assertRaises(TypeError):
+            _ = BadClass()
+
     def test_txt_equal(self):
         with NamedTempFile() as tf1, NamedTempFile() as tf2:
             with open(tf1.name, "w") as f1:
