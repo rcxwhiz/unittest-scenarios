@@ -3,7 +3,8 @@
 [![Tests](https://github.com/rcxwhiz/unittest-scenarios/actions/workflows/test.yml/badge.svg)](https://github.com/rcxwhiz/unittest-scenarios/actions/workflows/)
 [![Coverage](https://codecov.io/gh/rcxwhiz/unittest-scenarios/branch/main/graph/badge.svg)](https://codecov.io/gh/rcxwhiz/unittest-scenarios/)
 [![PyPi](https://img.shields.io/pypi/v/unittest-scenarios.svg)](https://pypi.python.org/pypi/unittest-scenarios/)
-[![Supported Python versions](https://img.shields.io/pypi/pyversions/unittest-scenarios.svg)](https://pypi.python.org/pypi/unittest-scenarios/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/unittest-scenarios)
+
 
 This library adds "scenario-based testing" to Pytest via `unittest.TestCase` mixins. A "scenario-based test" is a test
 that is defined by an initial and final state of files. This is useful for testing things like data pipelines/workflows
