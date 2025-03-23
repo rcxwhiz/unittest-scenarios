@@ -1,9 +1,8 @@
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
 from tempfile import NamedTemporaryFile
 from typing import IO
-
-from collections.abc import Generator
 
 
 @contextmanager

@@ -5,6 +5,7 @@ import unittest
 import zipfile
 
 from win_tempfile import NamedTempFile
+
 from src.unittest_scenarios import FileCmpMixin
 
 
