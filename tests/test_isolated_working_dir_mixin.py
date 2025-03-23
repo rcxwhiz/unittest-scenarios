@@ -12,6 +12,8 @@ from .win_tempfile import NamedTempFile
 class TestIsolatedWorkingDirMixin(unittest.TestCase):
 
     def test_subclass_requirement(self):
+        """Test unittest.TestCase subclass requirement"""
+
         class BadClass(IsolatedWorkingDirMixin):
             pass
 
@@ -19,6 +21,8 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
             _ = BadClass()
 
     def test_working_directory(self):
+        """Test that the tests working directory is different and the original is restored post-test"""
+
         original_working_directory = [os.getcwd()]
         test_working_directory = []
 
@@ -34,6 +38,8 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
         self.assertEqual([os.getcwd()], original_working_directory)
 
     def test_global_isolation(self):
+        """Test that the test working directory is empty"""
+
         class TestClass(IsolatedWorkingDirMixin, unittest.TestCase):
             def test_method(self):
                 self.assertEqual(len(os.listdir()), 0)
@@ -44,6 +50,8 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
         self.assertTrue(result.wasSuccessful())
 
     def test_inner_isolation(self):
+        """Test that modifications to the working directory are not preserved between tests"""
+
         class TestClass(IsolatedWorkingDirMixin, unittest.TestCase):
             def test_method_a(self):
                 with open("a.txt", "w") as f:
@@ -64,6 +72,8 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
         self.assertTrue(result.wasSuccessful())
 
     def test_cleanup(self):
+        """Test that the temporary dir is deleted after the test is complete"""
+
         test_dir = []
 
         class TestClass(IsolatedWorkingDirMixin, unittest.TestCase):
@@ -79,6 +89,8 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
         self.assertFalse(os.path.exists(test_dir[0]))
 
     def test_link(self):
+        """Test linking external item to the testing dir, showing that files and directories are available as links that can modify the outside"""
+
         try:
             os.mkdir("a")
             with open(os.path.join("a", "b.txt"), "w") as f:
@@ -119,6 +131,8 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
             os.remove("c.txt")
 
     def test_copy(self):
+        """Test copying external item to the testing dir, showing external versions are not modified"""
+
         try:
             os.mkdir("a")
             with open(os.path.join("a", "b.txt"), "w") as f:
@@ -158,6 +172,8 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
             os.remove("c.txt")
 
     def test_custom_connection(self):
+        """Demonstrate a custom outside connection function that changes file contents to uppercase"""
+
         def connect_upper(src: str, dest: str) -> None:
             with open(src) as f:
                 content = f.read()
