@@ -50,18 +50,23 @@ class TestScenarioMixin(unittest.TestCase):
             _ = TestClass()
 
     def test_missing_initial_state(self):
+        expected_text = """    def run_scenario(self, scenario_name: str) -> None:
+        raise NotImplementedError("Please provide a function for running a scenario")
+"""
+
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = (
                 Path(__file__).parent / "test_files" / "missing_initial_state"
             )
 
             def run_scenario(self, scenario_name: str) -> None:
-                pass
+                with open("a.txt", "w") as f:
+                    f.write(expected_text)
 
         suite = unittest.TestSuite()
         suite.addTest(TestClass("test_a"))
         result = unittest.TextTestRunner().run(suite)
-        self.assertFalse(result.wasSuccessful())
+        self.assertTrue(result.wasSuccessful())
 
     def test_missing_final_state(self):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
@@ -73,7 +78,7 @@ class TestScenarioMixin(unittest.TestCase):
         suite = unittest.TestSuite()
         suite.addTest(TestClass("test_a"))
         result = unittest.TextTestRunner().run(suite)
-        self.assertFalse(result.wasSuccessful())
+        self.assertTrue(result.wasSuccessful())
 
     def test_equal_dirs(self):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
