@@ -68,7 +68,7 @@ class TestScenarioMixin(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             _ = TestClass()
 
-    def test_missing_initial_state(self):
+    def test_missing_initial_state_ok(self):
         """Tests that a scenario can run without an initial state"""
 
         expected_text = """    def run_scenario(self, scenario_name: str) -> None:
@@ -79,6 +79,7 @@ class TestScenarioMixin(unittest.TestCase):
             scenarios_dir = (
                 Path(__file__).parent / "test_files" / "missing_initial_state"
             )
+            initial_state_missing_ok = True
 
             def run_scenario(self, scenario_name: str) -> None:
                 with open("a.txt", "w") as f:
@@ -89,11 +90,34 @@ class TestScenarioMixin(unittest.TestCase):
         result = unittest.TextTestRunner().run(suite)
         self.assertTrue(result.wasSuccessful())
 
-    def test_missing_final_state(self):
+    def test_missing_initial_state_bad(self):
+        """Tests error raised for missing initial state when not allowed"""
+
+        expected_text = """    def run_scenario(self, scenario_name: str) -> None:
+        raise NotImplementedError("Please provide a function for running a scenario")
+"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = (
+                Path(__file__).parent / "test_files" / "missing_initial_state"
+            )
+            initial_state_missing_ok = False
+
+            def run_scenario(self, scenario_name: str) -> None:
+                with open("a.txt", "w") as f:
+                    f.write(expected_text)
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertFalse(result.wasSuccessful())
+
+    def test_missing_final_state_ok(self):
         """Tests that a scenario can run and will pass without a final state"""
 
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "missing_final_state"
+            final_state_missing_ok = True
 
             def run_scenario(self, scenario_name: str) -> None:
                 pass
@@ -102,6 +126,21 @@ class TestScenarioMixin(unittest.TestCase):
         suite.addTest(TestClass("test_a"))
         result = unittest.TextTestRunner().run(suite)
         self.assertTrue(result.wasSuccessful())
+
+    def test_missing_final_state_bad(self):
+        """Tests error raised when missing final state not allowed"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "missing_final_state"
+            missing_final_state_ok = False
+
+            def run_scenario(self, scenario_name: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertFalse(result.wasSuccessful())
 
     def test_equal_dirs(self):
         """Show correct checking behavior for dirs that are the same"""
