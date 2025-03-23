@@ -228,3 +228,28 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
         suite.addTest(TestClass("test_method"))
         result = unittest.TextTestRunner().run(suite)
         self.assertFalse(result.wasSuccessful())
+
+    def test_unknown_connection_type(self):
+        """Tests error raised when an unsupported connection type is given"""
+
+        try:
+            with open("c.txt", "w") as f:
+                f.write("")
+
+            class TestClass(IsolatedWorkingDirMixin, unittest.TestCase):
+                external_connections = [
+                    IsolatedWorkingDirMixin.ExternalConnection(
+                        external_path="c.txt", strategy="random unknown method"
+                    ),
+                ]
+
+                def test_method(self):
+                    pass
+
+            suite = unittest.TestSuite()
+            suite.addTest(TestClass("test_method"))
+            result = unittest.TextTestRunner().run(suite)
+            self.assertFalse(result.wasSuccessful())
+
+        finally:
+            os.remove("c.txt")
