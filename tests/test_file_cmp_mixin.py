@@ -373,7 +373,14 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
 
             self.assertDirectoryContentsNotEqual(d1, d2)
 
+    def test_hash_files_equal(self):
+        """Compare equal images"""
+
+        test_files = Path(__file__).parent / "test_files"
+        self.assertPathContentsEqual(test_files / "a.png", test_files / "a.png")
+
     def test_hash_files_not_equal(self):
         """Compare not equal images"""
+
         test_files = Path(__file__).parent / "test_files"
         self.assertPathContentsNotEqual(test_files / "a.png", test_files / "b.png")
