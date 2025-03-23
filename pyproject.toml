@@ -1,6 +1,6 @@
 [project]
 name = "unittest-scenarios"
-version = "1.0.0"
+version = "1.0.1"
 description = "Add scenario based testing to unittest."
 authors = [
     { name = "Josh Bedwell", email = "rcxwhiz@gmail.com" }
