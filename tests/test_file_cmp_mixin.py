@@ -5,6 +5,7 @@ import tarfile
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 from src.unittest_scenarios import FileCmpMixin
 
@@ -31,6 +32,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
     """
 
     def create_tar(self, tar_path, files):
+        """Utility"""
+
         with tarfile.open(tar_path, "w") as tar:
             for filename, content in files.items():
                 file_path = os.path.join(os.path.dirname(tar_path), filename)
@@ -44,6 +47,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 os.remove(file_path)
 
     def create_zip(self, zip_path, files):
+        """Utility"""
+
         with zipfile.ZipFile(zip_path, "w") as zip:
             for filename, content in files.items():
                 file_path = os.path.join(os.path.dirname(zip_path), filename)
@@ -57,6 +62,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 os.remove(file_path)
 
     def test_subclass_requirement(self):
+        """Test that cannot be instantiated without subclassing unittest.TestCase"""
+
         class BadClass(FileCmpMixin):
             pass
 
@@ -64,6 +71,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             _ = BadClass()
 
     def test_txt_equal(self):
+        """Compare contents of text files that should be equal"""
+
         with NamedTempFile() as tf1, NamedTempFile() as tf2:
             with open(tf1.name, "w") as f1:
                 f1.write(self.text_a)
@@ -73,6 +82,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertTextFilesEqual(tf1.name, tf2.name)
 
     def test_txt_cross_platform(self):
+        """Compare contents of text files with different line endings that should be equal"""
+
         with NamedTempFile() as tf1, NamedTempFile() as tf2:
             with open(tf1.name, "w", newline="\n") as f1:
                 f1.write(self.text_a)
@@ -82,6 +93,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertTextFilesEqual(tf1.name, tf2.name)
 
     def test_txt_not_equal(self):
+        """Compare contents of text files that should not be equal"""
+
         with NamedTempFile() as tf1, NamedTempFile() as tf2:
             with open(tf1.name, "w") as f1:
                 f1.write(self.text_a)
@@ -91,6 +104,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertTextFilesNotEqual(tf1.name, tf2.name)
 
     def test_hash_equal(self):
+        """Compare hashes of contents of files that should be equal"""
+
         with NamedTempFile() as tf1, NamedTempFile() as tf2:
             with open(tf1.name, "w") as f1:
                 f1.write(self.text_a)
@@ -100,6 +115,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertFileHashesEqual(tf1.name, tf2.name)
 
     def test_hash_not_equal(self):
+        """Compare hashes of contents of files that should not be equal (different line endings)"""
+
         with NamedTempFile() as tf1, NamedTempFile() as tf2:
             with open(tf1.name, "w", newline="\n") as f1:
                 f1.write(self.text_a)
@@ -109,6 +126,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertFileHashesNotEqual(tf1.name, tf2.name)
 
     def test_archives_equal(self):
+        """Test that equivalently constructed zip and tar files are equal"""
+
         with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
             files = {"a.txt": self.text_a, "b.txt": self.text_b}
             self.create_zip(z1.name, files)
@@ -124,6 +143,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertArchiveContentsEqual(t1.name, t2.name)
 
     def test_archives_contents_not_equal(self):
+        """Test that archives with files with same names but different contents are not equal"""
+
         with NamedTempFile(suffix=".tar") as t1, NamedTempFile(suffix=".tar") as t2:
             self.create_tar(t1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
             self.create_tar(t2.name, {"a.txt": self.text_a, "b.txt": self.text_c})
@@ -131,6 +152,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertArchiveContentsNotEqual(t1.name, t2.name)
 
     def test_archives_missing_files(self):
+        """Compare that a left or right archive missing a file will be considered not equal"""
+
         with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
             self.create_zip(z1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
             self.create_zip(z2.name, {"a.txt": self.text_a})
@@ -144,6 +167,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertArchiveContentsNotEqual(z1.name, z2.name)
 
     def test_nested_archives_equal(self):
+        """Compare nested archives that should be equal"""
+
         with NamedTempFile(suffix=".tar") as t1, NamedTempFile(suffix=".tar") as t2:
             files = {"a.txt": self.text_a, "b.txt": self.text_b}
             self.create_tar(t1.name, files)
@@ -169,6 +194,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 self.assertArchiveContentsEqual(t11.name, t22.name)
 
     def test_nested_archives_not_equal(self):
+        """Compare archives that have a difference in the nested archive"""
+
         with NamedTempFile(suffix=".tar") as t1, NamedTempFile(suffix=".tar") as t2:
             self.create_tar(t1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
             self.create_tar(t2.name, {"a.txt": self.text_a, "b.txt": self.text_c})
@@ -193,6 +220,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 self.assertArchiveContentsNotEqual(t11.name, t22.name)
 
     def test_archive_types(self):
+        """Try comparing every type of supported archive"""
+
         with NamedTempFile(suffix=".zip") as z:
             with zipfile.ZipFile(z.name, "w") as zip:
                 file_path = os.path.join(os.path.dirname(z.name), "a.txt")
@@ -266,6 +295,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertArchiveContentsEqual(t.name, t.name)
 
     def test_dirs_equal(self):
+        """Compare two directories with equal contents"""
+
         with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
             with open(os.path.join(d1, "a.txt"), "w") as f:
                 f.write(self.text_a)
@@ -280,6 +311,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertDirectoryContentsEqual(d1, d2)
 
     def test_nested_dirs_equal(self):
+        """Compare nested directories with equal contents"""
+
         with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
             with open(os.path.join(d1, "a.txt"), "w") as f:
                 f.write(self.text_a)
@@ -300,6 +333,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertDirectoryContentsEqual(d1, d2)
 
     def test_dirs_not_equal(self):
+        """Compare directories with different contents"""
+
         with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
             with open(os.path.join(d1, "a.txt"), "w") as f:
                 f.write(self.text_a)
@@ -314,6 +349,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
             self.assertDirectoryContentsNotEqual(d1, d2)
 
     def test_dirs_missing_members(self):
+        """Test left and right directories missing a member"""
+
         with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
             with open(os.path.join(d1, "a.txt"), "w") as f:
                 f.write(self.text_a)
@@ -335,3 +372,15 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 f.write(self.text_b)
 
             self.assertDirectoryContentsNotEqual(d1, d2)
+
+    def test_hash_files_equal(self):
+        """Compare equal images"""
+
+        test_files = Path(__file__).parent / "test_files"
+        self.assertPathContentsEqual(test_files / "a.png", test_files / "a.png")
+
+    def test_hash_files_not_equal(self):
+        """Compare not equal images"""
+
+        test_files = Path(__file__).parent / "test_files"
+        self.assertPathContentsNotEqual(test_files / "a.png", test_files / "b.png")

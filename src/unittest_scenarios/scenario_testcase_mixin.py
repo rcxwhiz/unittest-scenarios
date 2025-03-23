@@ -19,6 +19,8 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
 
     scenarios_dir: str
     check_strategy: OutputChecking = OutputChecking.FILE_CONTENTS
+    initial_state_missing_ok = True
+    final_state_missing_ok = False
 
     def run_scenario(self, scenario_name: str) -> None:
         raise NotImplementedError("Please provide a function for running a scenario")
@@ -31,7 +33,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
 
         for scenario in os.listdir(cls.scenarios_dir):
             scenario_path = os.path.join(cls.scenarios_dir, scenario)
-            test_name = f"test_{scenario}"
+            test_name = f"test_{Path(scenario).stem}"
             setattr(cls, test_name, cls.generate_test(scenario, scenario_path))
 
         return super().__new__(cls)
@@ -59,7 +61,12 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
             if Path(file).stem == "initial_state"
         ]
         if len(initial_states) == 0:
-            return  # initial state not given
+            if self.initial_state_missing_ok:
+                return
+            else:
+                raise FileNotFoundError(
+                    f"Did not find initial state in {scenario_path.name}"
+                )
         if len(initial_states) > 1:
             raise FileExistsError(
                 f"Found multiple initial states in {scenario_path.name}"
@@ -83,10 +90,12 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
             if Path(file).stem == "final_state"
         ]
         if len(final_states) == 0:
-            print(
-                f"No final state found for {scenario_path.name}, skipping final state check"
-            )
-            return
+            if self.final_state_missing_ok:
+                return
+            else:
+                raise FileNotFoundError(
+                    f"Did not find final state in {scenario_path.name}"
+                )
         if len(final_states) > 1:
             raise FileExistsError(
                 f"Found multiple final states in {scenario_path.name}"
