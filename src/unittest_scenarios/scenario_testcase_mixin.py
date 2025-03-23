@@ -31,7 +31,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
 
         for scenario in os.listdir(cls.scenarios_dir):
             scenario_path = os.path.join(cls.scenarios_dir, scenario)
-            test_name = f"test_{scenario}"
+            test_name = f"test_{Path(scenario).stem}"
             setattr(cls, test_name, cls.generate_test(scenario, scenario_path))
 
         return super().__new__(cls)

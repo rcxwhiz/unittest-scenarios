@@ -46,6 +46,17 @@ class TestScenarioMixin(unittest.TestCase):
         self.assertTrue(check_var[0])
 
     def test_missing_scenario_dir(self):
+        """Test an error is raised when no scenario directory provided"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+
+            def run_scenario(self, scenario_name: str) -> None:
+                pass
+
+        with self.assertRaises(AttributeError):
+            _ = TestClass()
+
+    def test_bad_scenario_dir(self):
         """Tests an error is raised when the scenarios dir does not exist"""
 
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
@@ -220,3 +231,41 @@ class TestScenarioMixin(unittest.TestCase):
         suite.addTest(TestClass("test_a"))
         result = unittest.TextTestRunner().run(suite)
         self.assertTrue(result.wasSuccessful())
+
+    def test_fully_archived_scenario(self):
+        """Tests that an entire scenario can be given as an archive"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "zipped_scenario"
+
+            def run_scenario(self, scenario_name: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertTrue(result.wasSuccessful())
+
+    def test_multiple_initial_states(self):
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "multiple_initials"
+
+            def run_scenario(self, scenario_name: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertFalse(result.wasSuccessful())
+
+    def test_multiple_final_states(self):
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "multiple_finals"
+
+            def run_scenario(self, scenario_name: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertFalse(result.wasSuccessful())
