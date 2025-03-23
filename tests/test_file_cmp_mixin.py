@@ -5,6 +5,7 @@ import tarfile
 import tempfile
 import unittest
 import zipfile
+from pathlib import Path
 
 from src.unittest_scenarios import FileCmpMixin
 
@@ -371,3 +372,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 f.write(self.text_b)
 
             self.assertDirectoryContentsNotEqual(d1, d2)
+
+    def test_hash_files_not_equal(self):
+        """Compare not equal images"""
+        test_files = Path(__file__).parent / "test_files"
+        self.assertPathContentsNotEqual(test_files / "a.png", test_files / "b.png")
