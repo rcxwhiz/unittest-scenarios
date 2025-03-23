@@ -24,6 +24,9 @@ repository = "https://github.com/rcxwhiz/unittest-scenarios"
 [tool.poetry]
 packages = [{include = "unittest_scenarios", from = "src"}]
 
+[tool.poetry.dependencies]
+python = ">=3.12,<4"
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
