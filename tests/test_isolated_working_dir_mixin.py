@@ -210,3 +210,21 @@ class TestIsolatedWorkingDirMixin(unittest.TestCase):
             self.assertTrue(content.islower())
         finally:
             os.remove("a.txt")
+
+    def test_missing_connection(self):
+        """Tests error raised when an outside connection does not exist"""
+
+        class TestClass(IsolatedWorkingDirMixin, unittest.TestCase):
+            external_connections = [
+                IsolatedWorkingDirMixin.ExternalConnection(
+                    external_path="c.txt", strategy="symlink"
+                ),
+            ]
+
+            def test_method(self):
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_method"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertFalse(result.wasSuccessful())
