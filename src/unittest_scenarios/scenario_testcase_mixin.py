@@ -54,7 +54,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
     def _copy_initial_state(self, scenario_path: str) -> None:
         scenario_path = Path(scenario_path)
         initial_states = [
-            file
+            os.path.join(scenario_path, file)
             for file in os.listdir(scenario_path)
             if Path(file).stem == "initial_state"
         ]
@@ -69,7 +69,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
 
         initial_state_path = initial_states[0]
         if is_archive(initial_state_path):
-            with temp_archive_extract(scenario_path) as extracted:
+            with temp_archive_extract(initial_state_path) as extracted:
                 shutil.copytree(extracted, self.test_dir, dirs_exist_ok=True)
         else:
             shutil.copytree(initial_state_path, self.test_dir, dirs_exist_ok=True)
@@ -80,7 +80,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
 
         scenario_path = Path(scenario_path)
         final_states = [
-            file
+            os.path.join(scenario_path, file)
             for file in os.listdir(scenario_path)
             if Path(file).stem == "final_state"
         ]
@@ -98,11 +98,15 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
                 expected_files = set()
                 for root, _, files in os.walk(expected):
                     for file in files:
-                        expected_files.add(os.path.join(root, file))
+                        expected_files.add(
+                            os.path.relpath(os.path.join(root, file), expected)
+                        )
                 actual_files = set()
                 for root, _, files in os.walk(actual):
                     for file in files:
-                        actual_files.add(os.path.join(root, file))
+                        actual_files.add(
+                            os.path.relpath(os.path.join(root, file), actual)
+                        )
                 self.assertSetEqual(expected_files, actual_files)
             else:
                 self.assertDirectoryContentsEqual(expected, actual)
