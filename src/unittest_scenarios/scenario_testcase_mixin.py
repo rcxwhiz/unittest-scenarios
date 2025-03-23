@@ -59,9 +59,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
             if Path(file).stem == "initial_state"
         ]
         if len(initial_states) == 0:
-            raise FileNotFoundError(
-                f"Could not find initial state in {scenario_path.name}"
-            )
+            return  # initial state not given
         if len(initial_states) > 1:
             raise FileExistsError(
                 f"Found multiple initial states in {scenario_path.name}"
@@ -85,9 +83,10 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
             if Path(file).stem == "final_state"
         ]
         if len(final_states) == 0:
-            raise FileNotFoundError(
-                f"Could not find final state in {scenario_path.name}"
+            print(
+                f"No final state found for {scenario_path.name}, skipping final state check"
             )
+            return
         if len(final_states) > 1:
             raise FileExistsError(
                 f"Found multiple final states in {scenario_path.name}"

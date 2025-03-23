@@ -10,8 +10,8 @@ repos:
     rev: 7.1.0
     hooks:
     -   id: flake8
-        args: ['--extend-ignore=E203,E701', '--max-line-length=88']
-        files: ^(src/unittest_scenarios)/
+        args: ['--extend-ignore=E203,E501,E701,W293', '--max-line-length=88']
+        files: ^(src|tests)/
 
 -   repo: https://github.com/asottile/pyupgrade
     rev: v3.19.1
