@@ -24,7 +24,8 @@ class IsolatedWorkingDirMixin:
             raise TypeError(f"{cls.__name__} must be a subclass of unittest.TestCase")
         return super().__new__(cls)
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._test_temp_dir: tempfile.TemporaryDirectory | None = None
         self._original_working_dir: str | None = None
 

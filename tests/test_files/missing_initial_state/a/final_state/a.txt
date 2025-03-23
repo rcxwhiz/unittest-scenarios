@@ -1,0 +1,2 @@
+    def run_scenario(self, scenario_name: str) -> None:
+        raise NotImplementedError("Please provide a function for running a scenario")
