@@ -1,19 +1,22 @@
 [project]
 name = "unittest-scenarios"
-version = "1.1.0"
+version = "1.1.1"
 description = "Add scenario based testing to unittest."
 authors = [
     { name = "Josh Bedwell", email = "rcxwhiz@gmail.com" }
 ]
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.12"
+requires-python = "^3.12"
 dependencies = [
 ]
 classifiers = [
     "Topic :: Software Development :: Testing",
     "Topic :: Software Development :: Testing :: Unit",
-    "Framework :: Pytest"
+    "Framework :: Pytest",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 keywords = [ "unittest", "pytest" ]
 
@@ -25,7 +28,7 @@ repository = "https://github.com/rcxwhiz/unittest-scenarios"
 packages = [{include = "unittest_scenarios", from = "src"}]
 
 [tool.poetry.dependencies]
-python = ">=3.12,<4"
+python = "^3.12"
 
 
 [build-system]
