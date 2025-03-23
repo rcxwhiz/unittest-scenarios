@@ -4,9 +4,9 @@ import os
 import shutil
 import unittest
 
-from win_tempfile import NamedTempFile
-
 from src.unittest_scenarios import IsolatedWorkingDirMixin
+
+from .win_tempfile import NamedTempFile
 
 
 class TestIsolatedWorkingDirMixin(unittest.TestCase):
