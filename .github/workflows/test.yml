@@ -26,7 +26,7 @@ jobs:
           python -m pip install tox tox-gh-actions
 
       - name: Run tox
-        run: tox -v -- --cov=unittest_scenarios --cov-append --cov-report term-missing --cov-report xml
+        run: tox -v -- --cov=src --cov-append --cov-report term-missing --cov-report xml
 
       - name: Upload coverage
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13'
