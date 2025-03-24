@@ -26,73 +26,115 @@ class FileCmpMixin:
         return super().__new__(cls)
 
     def assertDirectoryContentsEqual(
-        self, expected_dir: str | PathLike[str], actual_dir: str | PathLike[str]
+        self,
+        expected_dir: str | PathLike[str],
+        actual_dir: str | PathLike[str],
+        a_must_have_all_items: bool = True,
+        b_must_have_all_items: bool = True,
     ) -> None:
         """
         Recursively checks that all items are present in both dirs and their contents are equal.
 
+        The parameters allowing one directory to not contain all members of the other is *not* passed recursively.
+
         :param expected_dir: string or path to first directory
         :param actual_dir: string or path to second directory
+        :param a_must_have_all_items: The first directory must have all items in the second to be equal
+        :param b_must_have_all_items: The second directory must have all items in the first to be equal
         """
 
-        if not isinstance(expected_dir, Path):
-            expected_dir = Path(expected_dir)
-        if not isinstance(actual_dir, Path):
-            actual_dir = Path(actual_dir)
-        self.assertTrue(expected_dir.is_dir(), f"{expected_dir} is not a directory")
-        self.assertTrue(actual_dir.is_dir(), f"{actual_dir} is not a directory")
+        expected_dir, actual_dir = Path(expected_dir), Path(actual_dir)
+        if not expected_dir.is_dir():
+            self.fail(f"{expected_dir} is not a directory")
+        if not actual_dir.is_dir():
+            self.fail(f"{actual_dir} is not a directory")
 
         expected_items = {item.name for item in expected_dir.iterdir()}
         actual_items = {item.name for item in actual_dir.iterdir()}
-        self.assertSetEqual(expected_items, actual_items)
 
-        for item in expected_items:
-            self.assertPathContentsEqual(
-                os.path.join(expected_dir, item), os.path.join(actual_dir, item)
-            )
+        if a_must_have_all_items and not actual_items.issubset(expected_items):
+            self.fail(f"{expected_dir} is missing items from {actual_dir}")
+        if b_must_have_all_items and not expected_items.issubset(actual_items):
+            self.fail(f"{actual_dir} is missing items from {expected_dir}")
+
+        for item in expected_items & actual_items:
+            self.assertPathContentsEqual(expected_dir / item, actual_dir / item)
 
     def assertDirectoryContentsNotEqual(
-        self, expected_dir: str | PathLike[str], actual_dir: str | PathLike[str]
+        self,
+        expected_dir: str | PathLike[str],
+        actual_dir: str | PathLike[str],
+        a_must_have_all_items: bool = True,
+        b_must_have_all_items: bool = True,
     ) -> None:
         """
         Negated version of assertDirectoryContentsEqual
 
+        The parameters allowing one directory to not contain all members of the other is *not* passed recursively.
+
         :param expected_dir: string or path to first directory
         :param actual_dir: string or path to second directory
+        :param a_must_have_all_items: The first directory must have all items in the second to be equal
+        :param b_must_have_all_items: The second directory must have all items in the first to be equal
         """
 
         with self.assertRaises(AssertionError, msg="Directory contents equal."):
-            self.assertDirectoryContentsEqual(expected_dir, actual_dir)
+            self.assertDirectoryContentsEqual(
+                expected_dir, actual_dir, a_must_have_all_items, b_must_have_all_items
+            )
 
     def assertArchiveContentsEqual(
-        self, expected_arc: str | PathLike[str], actual_arc: str | PathLike[str]
+        self,
+        expected_arc: str | PathLike[str],
+        actual_arc: str | PathLike[str],
+        a_must_have_all_items: bool = True,
+        b_must_have_all_items: bool = True,
     ) -> None:
         """
         Extracts archives and recursively compares their contents. Supports all major
         archive types.
 
+        The parameters allowing one archive to not contain all members of the other is *not* passed recursively.
+
         :param expected_arc: string or path to first archive
         :param actual_arc: string or path to second archive
+        :param a_must_have_all_items: The first directory must have all items in the second to be equal
+        :param b_must_have_all_items: The second directory must have all items in the first to be equal
         """
 
         with (
             temp_archive_extract(expected_arc) as expected_extracted,
             temp_archive_extract(actual_arc) as actual_extracted,
         ):
-            self.assertDirectoryContentsEqual(expected_extracted, actual_extracted)
+            self.assertDirectoryContentsEqual(
+                expected_extracted,
+                actual_extracted,
+                a_must_have_all_items,
+                b_must_have_all_items,
+            )
 
     def assertArchiveContentsNotEqual(
-        self, expected_arc: str | PathLike[str], actual_arc: str | PathLike[str]
+        self,
+        expected_arc: str | PathLike[str],
+        actual_arc: str | PathLike[str],
+        a_must_have_all_items: bool = True,
+        b_must_have_all_items: bool = True,
     ) -> None:
         """
         Negated version of assertArchiveContentsEqual.
 
+        The parameters allowing one archive to not contain all members of the other is *not* passed recursively.
+
         :param expected_arc: string or path to first archive
         :param actual_arc: string or path to second archive
+        :param a_must_have_all_items: The first directory must have all items in the second to be equal
+        :param b_must_have_all_items: The second directory must have all items in the first to be equal
         """
 
         with self.assertRaises(AssertionError, msg="Archive contents equal."):
-            self.assertArchiveContentsEqual(expected_arc, actual_arc)
+            self.assertArchiveContentsEqual(
+                expected_arc, actual_arc, a_must_have_all_items, b_must_have_all_items
+            )
 
     def assertTextFilesEqual(
         self, expected_file: str | PathLike[str], actual_file: str | PathLike[str]
@@ -111,14 +153,12 @@ class FileCmpMixin:
             for i, (line_expected, line_actual) in enumerate(
                 itertools.zip_longest(f_expected, f_actual, fillvalue=None)
             ):
-                self.assertIsNotNone(
-                    line_actual,
-                    f"{actual_file} ends on line {i + 1}, expected to continue",
-                )
-                self.assertIsNotNone(
-                    line_expected,
-                    f"{actual_file} continues past line {i}, expected to end",
-                )
+                if line_actual is None:
+                    self.fail(
+                        f"{actual_file} ends on line {i + 1}, expected to continue"
+                    )
+                if line_expected is None:
+                    self.fail(f"{actual_file} continues past line {i}, expected to end")
                 self.assertEqual(
                     line_expected,
                     line_actual,
@@ -190,10 +230,10 @@ class FileCmpMixin:
         :param actual_path: second file/dir
         """
 
-        self.assertTrue(
-            os.path.exists(expected_path), f"{expected_path} does not exist"
-        )
-        self.assertTrue(os.path.exists(actual_path), f"{actual_path} does not exist")
+        if not os.path.exists(expected_path):
+            self.fail(f"{expected_path} does not exist")
+        if not os.path.exists(actual_path):
+            self.fail(f"{actual_path} does not exist")
 
         if os.path.isdir(expected_path):
             self.assertDirectoryContentsEqual(expected_path, actual_path)

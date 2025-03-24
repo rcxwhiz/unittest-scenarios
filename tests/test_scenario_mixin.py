@@ -285,6 +285,8 @@ class TestScenarioMixin(unittest.TestCase):
         self.assertTrue(result.wasSuccessful())
 
     def test_multiple_initial_states(self):
+        """Checks that an error is raised when there are multiple possible initial states"""
+
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "multiple_initials"
 
@@ -297,6 +299,8 @@ class TestScenarioMixin(unittest.TestCase):
         self.assertFalse(result.wasSuccessful())
 
     def test_multiple_final_states(self):
+        """Checks that an error is raised when there are multiple possible final states"""
+
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "multiple_finals"
 
@@ -309,6 +313,8 @@ class TestScenarioMixin(unittest.TestCase):
         self.assertFalse(result.wasSuccessful())
 
     def test_scenario_path(self):
+        """Checks that the correct scenario path is passed to the run function"""
+
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "equal_dirs"
 
@@ -322,3 +328,65 @@ class TestScenarioMixin(unittest.TestCase):
         suite.addTest(TestClass("test_a"))
         result = unittest.TextTestRunner().run(suite)
         self.assertTrue(result.wasSuccessful())
+
+    def test_positive_missing_file_contents(self):
+        """Tests that a case missing files in the final state will pass when that flag is set - checking contents"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_final"
+            extra_final_items_allowed = True
+
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertTrue(result.wasSuccessful())
+
+    def test_negative_missing_file_contents(self):
+        """Tests that a case missing files in the working directory will fail even when the flag is set - checking contents"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_wd"
+            extra_final_items_allowed = True
+
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertFalse(result.wasSuccessful())
+
+    def test_positive_missing_file_names(self):
+        """Tests that a case missing files in the final state will pass when that flag is set - checking file names"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_final"
+            check_strategy = ScenarioTestCaseMixin.OutputChecking.FILE_NAMES
+            extra_final_items_allowed = True
+
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertTrue(result.wasSuccessful())
+
+    def test_negative_missing_file_names(self):
+        """Tests that a case missing files in the final state will fail even when the flag is set - checking file names"""
+
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_wd"
+            check_strategy = ScenarioTestCaseMixin.OutputChecking.FILE_NAMES
+            extra_final_items_allowed = True
+
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
+                pass
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertFalse(result.wasSuccessful())
