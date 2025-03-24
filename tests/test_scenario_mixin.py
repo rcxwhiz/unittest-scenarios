@@ -1,5 +1,4 @@
 # Josh Bedwell © 2025
-
 import unittest
 from pathlib import Path
 
@@ -36,7 +35,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "equal_dirs"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 check_var[0] = True
 
         suite = unittest.TestSuite()
@@ -50,7 +49,7 @@ class TestScenarioMixin(unittest.TestCase):
 
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         with self.assertRaises(AttributeError):
@@ -62,7 +61,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = "qwertyuiop"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         with self.assertRaises(FileNotFoundError):
@@ -81,7 +80,7 @@ class TestScenarioMixin(unittest.TestCase):
             )
             initial_state_missing_ok = True
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 with open("a.txt", "w") as f:
                     f.write(expected_text)
 
@@ -103,7 +102,7 @@ class TestScenarioMixin(unittest.TestCase):
             )
             initial_state_missing_ok = False
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 with open("a.txt", "w") as f:
                     f.write(expected_text)
 
@@ -119,7 +118,7 @@ class TestScenarioMixin(unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "missing_final_state"
             final_state_missing_ok = True
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -134,7 +133,7 @@ class TestScenarioMixin(unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "missing_final_state"
             missing_final_state_ok = False
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -148,7 +147,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "equal_dirs"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -162,7 +161,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "not_equal_dirs"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -176,7 +175,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "equal_tars"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -190,7 +189,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "not_equal_tars"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -204,7 +203,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "equal_zips"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -218,7 +217,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "not_equal_zips"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -233,7 +232,7 @@ class TestScenarioMixin(unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "not_equal_dirs"
             check_strategy = ScenarioTestCaseMixin.OutputChecking.FILE_NAMES
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -248,7 +247,7 @@ class TestScenarioMixin(unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "diff_names"
             check_strategy = ScenarioTestCaseMixin.OutputChecking.FILE_NAMES
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -263,7 +262,7 @@ class TestScenarioMixin(unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "diff_names"
             check_strategy = ScenarioTestCaseMixin.OutputChecking.NONE
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -277,7 +276,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "zipped_scenario"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -289,7 +288,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "multiple_initials"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
@@ -301,10 +300,25 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "multiple_finals"
 
-            def run_scenario(self, scenario_name: str) -> None:
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
 
         suite = unittest.TestSuite()
         suite.addTest(TestClass("test_a"))
         result = unittest.TextTestRunner().run(suite)
         self.assertFalse(result.wasSuccessful())
+
+    def test_scenario_path(self):
+        class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
+            scenarios_dir = Path(__file__).parent / "test_files" / "equal_dirs"
+
+            def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
+                self.assertEqual(
+                    str(Path(__file__).parent / "test_files" / "equal_dirs" / "a"),
+                    scenario_path,
+                )
+
+        suite = unittest.TestSuite()
+        suite.addTest(TestClass("test_a"))
+        result = unittest.TextTestRunner().run(suite)
+        self.assertTrue(result.wasSuccessful())
