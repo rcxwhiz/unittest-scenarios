@@ -36,6 +36,8 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
         check_strategy: how to check final state for success
         initial_state_missing_ok: should an error be raised for a missing initial state
         final_state_missing_ok: should an error be raised for a missing final state
+        extra_final_items_allowed: should test fail if the resulting working directory has additional files that are not
+            present in the final state
     """
 
     class OutputChecking(enum.Enum):
@@ -47,6 +49,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
     check_strategy: OutputChecking = OutputChecking.FILE_CONTENTS
     initial_state_missing_ok = True
     final_state_missing_ok = False
+    extra_final_items_allowed = True
 
     def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
         """
@@ -156,9 +159,17 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
                         actual_files.add(
                             os.path.relpath(os.path.join(root, file), actual)
                         )
-                self.assertSetEqual(expected_files, actual_files)
+                if self.extra_final_items_allowed:
+                    if not expected_files.issubset(actual_files):
+                        self.fail(f"missing files: {expected_files - actual_files}")
+                else:
+                    self.assertSetEqual(expected_files, actual_files)
             else:
-                self.assertDirectoryContentsEqual(expected, actual)
+                self.assertDirectoryContentsEqual(
+                    expected,
+                    actual,
+                    a_must_have_all_items=self.extra_final_items_allowed,
+                )
 
         final_state_path = final_states[0]
         if is_archive(final_state_path):
