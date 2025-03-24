@@ -230,10 +230,10 @@ class FileCmpMixin:
         :param actual_path: second file/dir
         """
 
-        self.assertTrue(
-            os.path.exists(expected_path), f"{expected_path} does not exist"
-        )
-        self.assertTrue(os.path.exists(actual_path), f"{actual_path} does not exist")
+        if not os.path.exists(expected_path):
+            self.fail(f"{expected_path} does not exist")
+        if not os.path.exists(actual_path):
+            self.fail(f"{actual_path} does not exist")
 
         if os.path.isdir(expected_path):
             self.assertDirectoryContentsEqual(expected_path, actual_path)
