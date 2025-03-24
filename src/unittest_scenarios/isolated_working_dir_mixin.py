@@ -10,8 +10,29 @@ from typing import Any, Literal
 
 
 class IsolatedWorkingDirMixin:
+    """
+    Mixin class for unittest.TestCase that makes each test occur in an isolated working
+    directory. Includes options for linking or copying external files.
+
+    Attributes:
+        temp_dir_opts: kwargs that will be passed to tempfile.TemporaryDirectory() call
+        external_connections: list of paths to link or copy
+    """
+
     @dataclass
     class ExternalConnection:
+        """
+        An external connection to an isolated test - will be connected once per test.
+
+        Custom callable connection strategies will receive the absolute source and
+        relative destination paths.
+
+        Attributes:
+            external_path: absolute or relative string path to item to connect
+            internal_path: relative destination path, keeps original name when None
+            strategy: default symlink, copy also available, supports custom callables
+        """
+
         external_path: str
         internal_path: str | None = None
         strategy: Literal["symlink", "copy"] | Callable[[str, str], None] = "symlink"
@@ -32,6 +53,7 @@ class IsolatedWorkingDirMixin:
     def setUp(self):
         super().setUp()
 
+        # create temp dir and switch to it
         temp_dir_opts = self.temp_dir_opts or {}
         self._test_temp_dir = tempfile.TemporaryDirectory(**temp_dir_opts)
         self._original_working_dir = os.getcwd()
@@ -42,6 +64,7 @@ class IsolatedWorkingDirMixin:
             raise RuntimeError("Failed to change to temporary directory") from e
         self.addCleanup(self._cleanup_temp_dir)
 
+        # apply external connections
         if self.external_connections:
             for connection in self.external_connections:
                 # if external path is relative, join with original working directory
@@ -84,10 +107,14 @@ class IsolatedWorkingDirMixin:
 
     @property
     def test_dir(self) -> str | None:
+        """Absolute path to the test directory."""
+
         if self._test_temp_dir is None:
             return None
         return self._test_temp_dir.name
 
     @property
     def original_working_dir(self) -> str | None:
+        """Absolute path to the original working directory."""
+
         return self._original_working_dir
