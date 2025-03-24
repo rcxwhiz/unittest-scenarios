@@ -49,11 +49,15 @@ class MyTestCase(FileCmpMixin, unittest.TestCase):
 
 This mixin can be useful for any situation where you are comparing files during tests. 
 
+The directory and archive comparison functions have optional parameters that allow one archive/directory to be a
+superset of the other and still pass. This does not propagate recursively. 
+
 ## IsolatedWorkingDirMixin
 
 This class causes each test to execute in an isolated temporary directory. It also provides options to connect external
 files via `ExternalConnection`. Default connection method is `"symlink"`, with `"copy"` also available in addition to
-providing a callable that takes the absolute source path and the destination path relative to the test directory. 
+providing a callable that takes the absolute source path and the destination path relative to the test directory. This
+callable could do something like copy and use the example config files if none were provided. 
 
 ```python
 class MyIsolatedTestCase(IsolatedWorkingDirMixin, unittest.TestCase):
@@ -93,6 +97,7 @@ class MyScenariosTestCase(ScenarioTestCaseMixin, unittest.TestCase):
         ExternalConnection(external_path=Path(__file__).parent.parent / "config", strategy=copy_config),
         ExternalConnection(external_path=Path(__file__).parent.parent / "workflow", strategy="symlink"),
     ]
+    extra_final_items_allowed = True
 
     def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
         expected_outputs = list(os.listdir(os.path.join(scenario_path, "final_state")))
@@ -100,5 +105,8 @@ class MyScenariosTestCase(ScenarioTestCaseMixin, unittest.TestCase):
         self.assertEqual(0, result.returncode, f"Snakemake had non-zero return code: {result.returncode}")
 ```
 
-Which would allow you to easily set up a ton of tests for your pipeline without having to update code. This mixin is
-useful for quickly and simply generating these file based tests. 
+This example sets the directory for scenarios, sets the checking strategy to recursively compare the contents of the
+files produced, connects external resources to the working directory, including config files with custom handling, and
+allows extra items in the working directory output that are not present in the expected final state, to allow for
+intermediate files and so on. The run function gathers the expected outputs from the final state and requests them from
+snakemake, checking that snakemake exists normally. 

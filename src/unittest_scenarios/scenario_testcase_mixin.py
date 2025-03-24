@@ -49,7 +49,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
     check_strategy: OutputChecking = OutputChecking.FILE_CONTENTS
     initial_state_missing_ok = True
     final_state_missing_ok = False
-    extra_final_items_allowed = True
+    extra_final_items_allowed = False
 
     def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
         """
@@ -168,7 +168,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
                 self.assertDirectoryContentsEqual(
                     expected,
                     actual,
-                    a_must_have_all_items=self.extra_final_items_allowed,
+                    a_must_have_all_items=not self.extra_final_items_allowed,
                 )
 
         final_state_path = final_states[0]
