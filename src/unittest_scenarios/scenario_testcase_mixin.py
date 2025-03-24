@@ -48,7 +48,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
     initial_state_missing_ok = True
     final_state_missing_ok = False
 
-    def run_scenario(self, scenario_name: str) -> None:
+    def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
         raise NotImplementedError("Please provide a function for running a scenario")
 
     def __new__(cls, *args, **kwargs):
@@ -78,11 +78,11 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
             if is_archive(scenario_path):
                 with temp_archive_extract(scenario_path) as extracted:
                     self._copy_initial_state(extracted)
-                    self.run_scenario(scenario_name)
+                    self.run_scenario(scenario_name, scenario_path)
                     self._check_final_state(extracted)
             else:
                 self._copy_initial_state(scenario_path)
-                self.run_scenario(scenario_name)
+                self.run_scenario(scenario_name, scenario_path)
                 self._check_final_state(scenario_path)
 
         return test_func
