@@ -31,9 +31,7 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
     Pellentesque finibus urna non orci luctus, sed condimentum lacus vestibulum. Etiam sit amet sapien eget.
     """
 
-    def create_tar(self, tar_path, files):
-        """Utility"""
-
+    def _create_tar(self, tar_path, files):
         with tarfile.open(tar_path, "w") as tar:
             for filename, content in files.items():
                 file_path = os.path.join(os.path.dirname(tar_path), filename)
@@ -46,9 +44,7 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 tar.add(file_path, arcname=filename)
                 os.remove(file_path)
 
-    def create_zip(self, zip_path, files):
-        """Utility"""
-
+    def _create_zip(self, zip_path, files):
         with zipfile.ZipFile(zip_path, "w") as zip:
             for filename, content in files.items():
                 file_path = os.path.join(os.path.dirname(zip_path), filename)
@@ -130,15 +126,15 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
 
         with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
             files = {"a.txt": self.text_a, "b.txt": self.text_b}
-            self.create_zip(z1.name, files)
-            self.create_zip(z2.name, files)
+            self._create_zip(z1.name, files)
+            self._create_zip(z2.name, files)
 
             self.assertArchiveContentsEqual(z1.name, z2.name)
 
         with NamedTempFile(suffix=".tar") as t1, NamedTempFile(suffix=".tar") as t2:
             files = {"a.txt": self.text_a, "b.txt": self.text_b}
-            self.create_tar(t1.name, files)
-            self.create_tar(t2.name, files)
+            self._create_tar(t1.name, files)
+            self._create_tar(t2.name, files)
 
             self.assertArchiveContentsEqual(t1.name, t2.name)
 
@@ -146,8 +142,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
         """Test that archives with files with same names but different contents are not equal"""
 
         with NamedTempFile(suffix=".tar") as t1, NamedTempFile(suffix=".tar") as t2:
-            self.create_tar(t1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
-            self.create_tar(t2.name, {"a.txt": self.text_a, "b.txt": self.text_c})
+            self._create_tar(t1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
+            self._create_tar(t2.name, {"a.txt": self.text_a, "b.txt": self.text_c})
 
             self.assertArchiveContentsNotEqual(t1.name, t2.name)
 
@@ -155,24 +151,85 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
         """Compare that a left or right archive missing a file will be considered not equal"""
 
         with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
-            self.create_zip(z1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
-            self.create_zip(z2.name, {"a.txt": self.text_a})
+            self._create_zip(z1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
+            self._create_zip(z2.name, {"a.txt": self.text_a})
 
             self.assertArchiveContentsNotEqual(z1.name, z2.name)
 
         with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
-            self.create_zip(z1.name, {"a.txt": self.text_a})
-            self.create_zip(z2.name, {"a.txt": self.text_a, "b.txt": self.text_b})
+            self._create_zip(z1.name, {"a.txt": self.text_a})
+            self._create_zip(z2.name, {"a.txt": self.text_a, "b.txt": self.text_b})
 
             self.assertArchiveContentsNotEqual(z1.name, z2.name)
+
+    def test_archives_missing_files_okay(self):
+        """Use a or b must have all items filters"""
+
+        with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
+            self._create_zip(z1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
+            self._create_zip(z2.name, {"a.txt": self.text_a})
+
+            self.assertArchiveContentsEqual(
+                z1.name, z2.name, b_must_have_all_items=False
+            )
+            self.assertArchiveContentsNotEqual(
+                z1.name, z2.name, a_must_have_all_items=False
+            )
+
+        with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
+            self._create_zip(z1.name, {"a.txt": self.text_a})
+            self._create_zip(z2.name, {"a.txt": self.text_a, "b.txt": self.text_b})
+
+            self.assertArchiveContentsEqual(
+                z1.name, z2.name, a_must_have_all_items=False
+            )
+            self.assertArchiveContentsNotEqual(
+                z1.name, z2.name, b_must_have_all_items=False
+            )
+
+    def test_only_common_archive_files(self):
+        """Tests behavior when only common files are compared"""
+
+        with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
+            self._create_zip(z1.name, {"a.txt": self.text_a})
+            self._create_zip(z2.name, {"b.txt": self.text_b})
+
+            self.assertArchiveContentsEqual(
+                z1.name,
+                z2.name,
+                a_must_have_all_items=False,
+                b_must_have_all_items=False,
+            )
+
+        with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
+            self._create_zip(z1.name, {"a.txt": self.text_a, "c.txt": self.text_c})
+            self._create_zip(z2.name, {"b.txt": self.text_b, "c.txt": self.text_c})
+
+            self.assertArchiveContentsEqual(
+                z1.name,
+                z2.name,
+                a_must_have_all_items=False,
+                b_must_have_all_items=False,
+            )
+
+        with NamedTempFile(suffix=".zip") as z1, NamedTempFile(suffix=".zip") as z2:
+            self._create_zip(z1.name, {"a.txt": self.text_a, "c.txt": self.text_c})
+            self._create_zip(z2.name, {"b.txt": self.text_b, "c.txt": self.text_a})
+
+            self.assertArchiveContentsNotEqual(
+                z1.name,
+                z2.name,
+                a_must_have_all_items=False,
+                b_must_have_all_items=False,
+            )
 
     def test_nested_archives_equal(self):
         """Compare nested archives that should be equal"""
 
         with NamedTempFile(suffix=".tar") as t1, NamedTempFile(suffix=".tar") as t2:
             files = {"a.txt": self.text_a, "b.txt": self.text_b}
-            self.create_tar(t1.name, files)
-            self.create_tar(t2.name, files)
+            self._create_tar(t1.name, files)
+            self._create_tar(t2.name, files)
             t1.flush()
             t2.flush()
             t1.close()
@@ -183,11 +240,11 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 NamedTempFile(suffix=".tar") as t22,
             ):
                 with open(t1.name, "rb") as t1:
-                    self.create_tar(
+                    self._create_tar(
                         t11.name, {"c.txt": self.text_c, "arc.tar": t1.read()}
                     )
                 with open(t2.name, "rb") as t2:
-                    self.create_tar(
+                    self._create_tar(
                         t22.name, {"c.txt": self.text_c, "arc.tar": t2.read()}
                     )
 
@@ -197,8 +254,8 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
         """Compare archives that have a difference in the nested archive"""
 
         with NamedTempFile(suffix=".tar") as t1, NamedTempFile(suffix=".tar") as t2:
-            self.create_tar(t1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
-            self.create_tar(t2.name, {"a.txt": self.text_a, "b.txt": self.text_c})
+            self._create_tar(t1.name, {"a.txt": self.text_a, "b.txt": self.text_b})
+            self._create_tar(t2.name, {"a.txt": self.text_a, "b.txt": self.text_c})
             t1.flush()
             t2.flush()
             t1.close()
@@ -209,11 +266,11 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 NamedTempFile(suffix=".tar") as t22,
             ):
                 with open(t1.name, "rb") as t1:
-                    self.create_tar(
+                    self._create_tar(
                         t11.name, {"c.txt": self.text_c, "arc.tar": t1.read()}
                     )
                 with open(t2.name, "rb") as t2:
-                    self.create_tar(
+                    self._create_tar(
                         t22.name, {"c.txt": self.text_c, "arc.tar": t2.read()}
                     )
 
@@ -372,6 +429,77 @@ class FileCmpTestCase(FileCmpMixin, unittest.TestCase):
                 f.write(self.text_b)
 
             self.assertDirectoryContentsNotEqual(d1, d2)
+
+    def test_dirs_missing_members_okay(self):
+        """Tests modifiers for both directories not needing all items"""
+
+        with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+            with open(os.path.join(d1, "a.txt"), "w") as f:
+                f.write(self.text_a)
+            with open(os.path.join(d1, "b.txt"), "w") as f:
+                f.write(self.text_b)
+
+            with open(os.path.join(d2, "a.txt"), "w") as f:
+                f.write(self.text_a)
+
+            self.assertDirectoryContentsEqual(d1, d2, b_must_have_all_items=False)
+            self.assertDirectoryContentsNotEqual(d1, d2, a_must_have_all_items=False)
+
+        with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+            with open(os.path.join(d1, "a.txt"), "w") as f:
+                f.write(self.text_a)
+
+            with open(os.path.join(d2, "a.txt"), "w") as f:
+                f.write(self.text_a)
+            with open(os.path.join(d2, "b.txt"), "w") as f:
+                f.write(self.text_b)
+
+            self.assertDirectoryContentsEqual(d1, d2, a_must_have_all_items=False)
+            self.assertDirectoryContentsNotEqual(d1, d2, b_must_have_all_items=False)
+
+    def test_dirs_only_cmp_common_items(self):
+        """Tests when directories are only comparing common items"""
+
+        with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+            with open(os.path.join(d1, "b.txt"), "w") as f:
+                f.write(self.text_b)
+
+            with open(os.path.join(d2, "a.txt"), "w") as f:
+                f.write(self.text_a)
+
+            self.assertDirectoryContentsEqual(
+                d1, d2, a_must_have_all_items=False, b_must_have_all_items=False
+            )
+
+        with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+            with open(os.path.join(d1, "b.txt"), "w") as f:
+                f.write(self.text_b)
+            with open(os.path.join(d1, "c.txt"), "w") as f:
+                f.write(self.text_c)
+
+            with open(os.path.join(d2, "a.txt"), "w") as f:
+                f.write(self.text_a)
+            with open(os.path.join(d2, "c.txt"), "w") as f:
+                f.write(self.text_c)
+
+            self.assertDirectoryContentsEqual(
+                d1, d2, a_must_have_all_items=False, b_must_have_all_items=False
+            )
+
+        with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+            with open(os.path.join(d1, "b.txt"), "w") as f:
+                f.write(self.text_b)
+            with open(os.path.join(d1, "c.txt"), "w") as f:
+                f.write(self.text_c)
+
+            with open(os.path.join(d2, "a.txt"), "w") as f:
+                f.write(self.text_a)
+            with open(os.path.join(d2, "c.txt"), "w") as f:
+                f.write(self.text_b)
+
+            self.assertDirectoryContentsNotEqual(
+                d1, d2, a_must_have_all_items=False, b_must_have_all_items=False
+            )
 
     def test_hash_files_equal(self):
         """Compare equal images"""
