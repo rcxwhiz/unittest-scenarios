@@ -4,8 +4,8 @@ import enum
 import os
 import shutil
 from collections.abc import Callable
-from pathlib import Path
 from os import PathLike
+from pathlib import Path
 
 from unittest_scenarios.file_cmp_mixin import FileCmpMixin
 from unittest_scenarios.isolated_working_dir_mixin import IsolatedWorkingDirMixin
