@@ -74,7 +74,7 @@ presumably contain all the files from `initial_state` in upper case.
 class MyScenarioTestCase(ScenarioTestCaseMixin, unittest.TestCase):
     scenarios_dir = Path(__file__).parent / "scenarios"
 
-    def run_scenario(self, scenario_name: str) -> None:
+    def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
         for filename in os.listdir():
             with open(filename, "r") as f:
                 content = f.read()
@@ -94,10 +94,9 @@ class MyScenariosTestCase(ScenarioTestCaseMixin, unittest.TestCase):
         ExternalConnection(external_path=Path(__file__).parent.parent / "workflow", strategy="symlink"),
     ]
 
-    def run_scenario(self, scenario_name: str) -> None:
-        with open("expected_outputs.txt", "r") as f:
-            expected_outputs = f.read()
-        result = subprocess.run(["snakemake", "--use-conda", expected_outputs])
+    def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
+        expected_outputs = list(os.listdir(os.path.join(scenario_path, "final_state")))
+        result = subprocess.run(["snakemake", "--use-conda"] + expected_outputs)
         self.assertEqual(0, result.returncode, f"Snakemake had non-zero return code: {result.returncode}")
 ```
 

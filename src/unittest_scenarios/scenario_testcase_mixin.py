@@ -49,6 +49,13 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
     final_state_missing_ok = False
 
     def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
+        """
+        Called for each scenario in an isolated working directory with the contents of the initial state copied in.
+
+        :param scenario_name: Name of the scenario, gathered from its directory/archive
+        :param scenario_path: The absolute path to the scenario, either a directory or archive.
+        """
+
         raise NotImplementedError("Please provide a function for running a scenario")
 
     def __new__(cls, *args, **kwargs):
