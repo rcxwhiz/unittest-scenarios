@@ -1,5 +1,3 @@
-from unittest_scenarios import IsolatedWorkingDirMixin
-
 # Unittest Scenarios
 
 [![Tests](https://github.com/rcxwhiz/unittest-scenarios/actions/workflows/test.yml/badge.svg)](https://github.com/rcxwhiz/unittest-scenarios/actions/workflows/)
