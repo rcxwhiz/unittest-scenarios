@@ -334,7 +334,7 @@ class TestScenarioMixin(unittest.TestCase):
 
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_final"
-            extra_final_items_allowed = True
+            match_final_state_exactly = False
 
             def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
@@ -349,7 +349,7 @@ class TestScenarioMixin(unittest.TestCase):
 
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_wd"
-            extra_final_items_allowed = True
+            match_final_state_exactly = False
 
             def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
@@ -365,7 +365,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_final"
             check_strategy = ScenarioTestCaseMixin.OutputChecking.FILE_NAMES
-            extra_final_items_allowed = True
+            match_final_state_exactly = False
 
             def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass
@@ -381,7 +381,7 @@ class TestScenarioMixin(unittest.TestCase):
         class TestClass(ScenarioTestCaseMixin, unittest.TestCase):
             scenarios_dir = Path(__file__).parent / "test_files" / "missing_in_wd"
             check_strategy = ScenarioTestCaseMixin.OutputChecking.FILE_NAMES
-            extra_final_items_allowed = True
+            match_final_state_exactly = False
 
             def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
                 pass

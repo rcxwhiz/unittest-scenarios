@@ -36,8 +36,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
         check_strategy: how to check final state for success
         initial_state_missing_ok: should an error be raised for a missing initial state
         final_state_missing_ok: should an error be raised for a missing final state
-        extra_final_items_allowed: should test fail if the resulting working directory has additional files that are not
-            present in the final state
+        match_final_state_exactly: If this is False, extra files in the output at the end of the test will be ignored
     """
 
     class OutputChecking(enum.Enum):
@@ -49,7 +48,7 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
     check_strategy: OutputChecking = OutputChecking.FILE_CONTENTS
     initial_state_missing_ok = True
     final_state_missing_ok = False
-    extra_final_items_allowed = False
+    match_final_state_exactly = True
 
     def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
         """
@@ -146,30 +145,36 @@ class ScenarioTestCaseMixin(IsolatedWorkingDirMixin, FileCmpMixin):
             )
 
         def cmp(expected, actual):
+            expected_files = set()
+            for root, _, files in os.walk(expected):
+                for file in files:
+                    expected_files.add(
+                        os.path.relpath(os.path.join(root, file), expected)
+                    )
+            actual_files = set()
+            for root, _, files in os.walk(actual):
+                for file in files:
+                    actual_files.add(os.path.relpath(os.path.join(root, file), actual))
+
             if self.check_strategy == ScenarioTestCaseMixin.OutputChecking.FILE_NAMES:
-                expected_files = set()
-                for root, _, files in os.walk(expected):
-                    for file in files:
-                        expected_files.add(
-                            os.path.relpath(os.path.join(root, file), expected)
-                        )
-                actual_files = set()
-                for root, _, files in os.walk(actual):
-                    for file in files:
-                        actual_files.add(
-                            os.path.relpath(os.path.join(root, file), actual)
-                        )
-                if self.extra_final_items_allowed:
+                if self.match_final_state_exactly:
+                    self.assertSetEqual(expected_files, actual_files)
+                else:
                     if not expected_files.issubset(actual_files):
                         self.fail(f"missing files: {expected_files - actual_files}")
-                else:
-                    self.assertSetEqual(expected_files, actual_files)
             else:
-                self.assertDirectoryContentsEqual(
-                    expected,
-                    actual,
-                    a_must_have_all_items=not self.extra_final_items_allowed,
-                )
+                if self.match_final_state_exactly:
+                    self.assertDirectoryContentsEqual(
+                        expected,
+                        actual,
+                    )
+                else:
+                    if not expected_files.issubset(actual_files):
+                        self.fail(f"missing files: {expected_files - actual_files}")
+                    for file in expected_files:
+                        self.assertPathContentsEqual(
+                            os.path.join(expected, file), os.path.join(actual, file)
+                        )
 
         final_state_path = final_states[0]
         if is_archive(final_state_path):

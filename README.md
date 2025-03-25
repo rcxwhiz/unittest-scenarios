@@ -97,7 +97,7 @@ class MyScenariosTestCase(ScenarioTestCaseMixin, unittest.TestCase):
         ExternalConnection(external_path=Path(__file__).parent.parent / "config", strategy=copy_config),
         ExternalConnection(external_path=Path(__file__).parent.parent / "workflow", strategy="symlink"),
     ]
-    extra_final_items_allowed = True
+    match_final_state_exactly = False
 
     def run_scenario(self, scenario_name: str, scenario_path: str) -> None:
         expected_outputs = list(os.listdir(os.path.join(scenario_path, "final_state")))
@@ -108,5 +108,5 @@ class MyScenariosTestCase(ScenarioTestCaseMixin, unittest.TestCase):
 This example sets the directory for scenarios, sets the checking strategy to recursively compare the contents of the
 files produced, connects external resources to the working directory, including config files with custom handling, and
 allows extra items in the working directory output that are not present in the expected final state, to allow for
-intermediate files and so on. The run function gathers the expected outputs from the final state and requests them from
-snakemake, checking that snakemake exists normally. 
+intermediate files that aren't cleaned up and so on. The run function gathers the expected outputs from the final state
+and requests them from snakemake, checking that snakemake exists normally. 
